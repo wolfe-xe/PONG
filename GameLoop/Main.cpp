@@ -7,12 +7,15 @@ SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 int game_is_running = FALSE;
 
+int last_frame_time = 0;
+
 struct Box
 {
 	float x;
 	float y;
 	float width;
 	float height;
+
 } box;
 
 int Initialize_Window(void) {
@@ -66,7 +69,13 @@ void Start() {
 }
 
 void Update() {
-	box.x += 1;
+	//logic for fixed timeStep
+
+	//wait until we reach the frame target time;
+	while (!SDL_TICKS_PASSED(SDL_GetTicks(), last_frame_time + FRAME_TARGET_TIME));
+	last_frame_time = SDL_GetTicks();
+
+	box.x += 2;
 	box.y += 1;
 }
 
@@ -97,7 +106,7 @@ void Destroy_Window() {
 
 /// <summary>
 /// argc (argument count) - Non - negative value representing the number of arguments passed to the program from the environment in which the program is run.
-/// argv (argument vector) -	Pointer to the first element of an array of argc + 1 pointers, of which the last one is null and the previous ones, if any, point to strings that represent the arguments passed to the program from the host environment. If argv[0] is not a null pointer (or, equivalently, if argc > 0), it points to a string that represents the program name, which is empty if the program name is not available from the host environment.
+/// argv (argument vector) - Pointer to the first element of an array of argc + 1 pointers, of which the last one is null and the previous ones, if any, point to strings that represent the arguments passed to the program from the host environment. If argv[0] is not a null pointer (or, equivalently, if argc > 0), it points to a string that represents the program name, which is empty if the program name is not available from the host environment.
 /// </summary>
 int main(int argc, char* argv[]) {
 	game_is_running = Initialize_Window();
