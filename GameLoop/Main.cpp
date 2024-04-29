@@ -71,12 +71,26 @@ void Start() {
 void Update() {
 	//logic for fixed timeStep
 
-	//wait until we reach the frame target time;
-	while (!SDL_TICKS_PASSED(SDL_GetTicks(), last_frame_time + FRAME_TARGET_TIME));
+	///<summary>
+	/// wait until we reach the frame target time;
+	/// while (!SDL_TICKS_PASSED(SDL_GetTicks(), last_frame_time + FRAME_TARGET_TIME));
+	/// a while loop can be dangerous for the processor as it takes all the attention for the time being making it heavy on the cpu
+	/// therefore using a SDL_Delay() would be a much better option as its not heavy on the CPU
+	///</summary>
+	
+	int time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - last_frame_time);
+	if (time_to_wait > 0 && time_to_wait <= FRAME_TARGET_TIME) {
+		SDL_Delay(time_to_wait);
+	}
+
+	//get a delta time factor, convert it to seconds to be used to update my game objects;
+	float delta_time = (SDL_GetTicks() - last_frame_time) / 1000.0f;
+
+	//store the ms of the current frame to be used in the next one;
 	last_frame_time = SDL_GetTicks();
 
-	box.x += 2;
-	box.y += 1;
+	box.x += 50 * delta_time;
+	box.y += 50 * delta_time;
 }
 
 void Render() {
