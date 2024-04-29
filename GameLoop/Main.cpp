@@ -15,6 +15,8 @@ struct Box
 	float y;
 	float width;
 	float height;
+	float x_velocity;
+	float y_velocity;
 
 } box;
 
@@ -30,7 +32,7 @@ int Initialize_Window(void) {
 		SDL_WINDOWPOS_CENTERED,
 		WINDOW_WIDHT,
 		WINDOW_HEIGHT,
-		SDL_WINDOW_BORDERLESS
+		SDL_WINDOW_SHOWN
 	);
 	if (!window) {
 		fprintf(stderr, "Error creating SDL window \n");
@@ -62,10 +64,12 @@ void Process_Input() {
 	}
 }
 void Start() {
-	box.x = 20;
-	box.y = 20;
+	box.x = (WINDOW_WIDHT - box.width) / 2;
+	box.y = (WINDOW_HEIGHT - box.height) / 2;
 	box.width = 10;
 	box.height = 10;
+	box.x_velocity = SPEED;
+	box.y_velocity = SPEED;
 }
 
 void Update() {
@@ -89,8 +93,27 @@ void Update() {
 	//store the ms of the current frame to be used in the next one;
 	last_frame_time = SDL_GetTicks();
 
-	box.x += 50 * delta_time;
-	box.y += 50 * delta_time;
+	box.x += box.x_velocity * delta_time;
+	box.y += box.y_velocity * delta_time;
+
+	//collision detection with bounds
+	if (box.x <= 0) {
+		box.x = 0;
+		box.x_velocity = -box.x_velocity;
+	}
+	if (box.y <= 0) {
+		box.y = 0;
+		box.y_velocity = -box.y_velocity;
+	}
+	if (box.x >= WINDOW_WIDHT - box.width) {
+		box.x = WINDOW_WIDHT - box.width;
+		box.x_velocity = -box.x_velocity;
+	}
+	if (box.y >= WINDOW_HEIGHT - box.height) {
+		box.y = WINDOW_HEIGHT - box.height;
+		box.y_velocity = -box.y_velocity;
+	}
+	
 }
 
 void Render() {
