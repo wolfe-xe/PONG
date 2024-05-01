@@ -35,6 +35,15 @@ struct player
 	float y_vel;
 } player;
 
+struct opponent
+{
+	float x;
+	float y;
+	float width;
+	float height;
+	float y_vel;
+} opponent;
+
 
 int Initialize_Window(void) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -72,26 +81,41 @@ void Process_Input() {
 	case SDL_KEYDOWN:
 		if (event.key.keysym.sym == SDLK_ESCAPE)
 			controlls.game_is_running = FALSE;
-		if (event.key.keysym.sym == SDLK_UP) {
-			controlls.up == TRUE;
+		if (event.key.keysym.sym == SDLK_w) {
+			controlls.up = TRUE;
 			player.y_vel = -SPEED;
 		}
-		if (event.key.keysym.sym == SDLK_DOWN) {
-			controlls.down == TRUE;
+		if (event.key.keysym.sym == SDLK_s) {
+			controlls.down = TRUE;
 			player.y_vel = SPEED;
+		}
+		if (event.key.keysym.sym == SDLK_UP) {
+			controlls.up = TRUE;
+			opponent.y_vel = -SPEED;
+		}
+		if (event.key.keysym.sym == SDLK_DOWN) {
+			controlls.down = TRUE;
+			opponent.y_vel = SPEED;
 		}
 
 	case SDL_KEYUP:
+		if (event.key.keysym.sym == SDLK_w) {
+			controlls.up = FALSE;
+		}
+		if (event.key.keysym.sym == SDLK_s) {
+			controlls.down = FALSE;
+		}
 		if (event.key.keysym.sym == SDLK_UP) {
-			controlls.up == FALSE;
+			controlls.up = FALSE;
 		}
 		if (event.key.keysym.sym == SDLK_DOWN) {
-			controlls.down == FALSE;
+			controlls.down = FALSE;
 		}
 	}
 }
 
 void Start() {
+	//setting up ball's initial pos
 	box.x = (WINDOW_WIDHT - box.width) / 2;
 	box.y = (WINDOW_HEIGHT - box.height) / 2;
 	box.width = 10;
@@ -99,11 +123,19 @@ void Start() {
 	box.x_velocity = SPEED;
 	box.y_velocity = SPEED;
 
+	//setting up players initial pos
 	player.x = 15;
 	player.y = (WINDOW_HEIGHT - player.height) / 2;
 	player.width = 15;
 	player.height = 50;
 	player.y_vel = -SPEED;
+
+	//setting up opponents inital pos
+	opponent.x = WINDOW_WIDHT - 35;
+	opponent.y = (WINDOW_HEIGHT - opponent.height) / 2;
+	opponent.width = 15;
+	opponent.height = 50;
+	opponent.y_vel = SPEED;
 }
 
 void Update() {
@@ -131,9 +163,23 @@ void Update() {
 		player.y = 0;
 		player.y_vel = -player.y_vel;
 	}	
+	//bottom bounds
 	if (player.y >= WINDOW_HEIGHT - player.height) {
 		player.y = WINDOW_HEIGHT - player.height;
 		player.y_vel = -player.y_vel;
+	}
+
+	//updating opponent
+	opponent.y += opponent.y_vel * delta_time;
+	//checking opponents bounds
+	if (opponent.y <= 0) {
+		opponent.y = 0;
+		opponent.y_vel = -opponent.y_vel;
+	}
+	//bottom bounds
+	if (opponent.y >= WINDOW_HEIGHT - opponent.height) {
+		opponent.y = WINDOW_HEIGHT - opponent.height;
+		opponent.y_vel = -opponent.y_vel;
 	}
 
 	//ball controlls 
@@ -155,6 +201,7 @@ void Update() {
 		box.x_velocity = -box.x_velocity;
 		//controlls.game_is_running = FALSE;
 	}
+	//bottom bounds
 	if (box.y >= WINDOW_HEIGHT - box.height) {
 		box.y = WINDOW_HEIGHT - box.height;
 		box.y_velocity = -box.y_velocity;
@@ -181,9 +228,17 @@ void Render() {
 		(int)player.height
 	};
 
+	SDL_Rect opponent_rect = {
+		(int)opponent.x,
+		(int)opponent.y,
+		(int)opponent.width,
+		(int)opponent.height
+	};
+
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderFillRect(renderer, &box_rect);
 	SDL_RenderFillRect(renderer, &player_rect);
+	SDL_RenderFillRect(renderer, &opponent_rect);
 
 	SDL_RenderPresent(renderer);
 	
