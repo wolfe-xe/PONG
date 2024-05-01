@@ -9,7 +9,14 @@ int game_is_running = FALSE;
 
 int last_frame_time = 0;
 
-struct Box
+struct controlls 
+{
+	int game_is_running = FALSE;
+	int up = FALSE;
+	int down = FALSE;
+} controlls;
+
+struct Box 
 {
 	float x;
 	float y;
@@ -17,15 +24,23 @@ struct Box
 	float height;
 	float x_velocity;
 	float y_velocity;
-
 } box;
+
+struct player
+{
+	float x;
+	float y;
+	float width;
+	float height;
+	float y_vel;
+} player;
+
 
 int Initialize_Window(void) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		fprintf(stderr, "Error Initializing SDL. \n");
 		return FALSE;
 	}
-
 	window = SDL_CreateWindow(
 		"GameLoop", 
 		SDL_WINDOWPOS_CENTERED,
@@ -38,12 +53,10 @@ int Initialize_Window(void) {
 		fprintf(stderr, "Error creating SDL window \n");
 		return FALSE;
 	}
-
 	renderer = SDL_CreateRenderer(window, -1, 0);
 	if (!renderer) {
 		fprintf(stderr, "Error creating SDL Renderer \n");
 	}
-
 	return TRUE;
 }
 
@@ -53,16 +66,31 @@ void Process_Input() {
 
 	switch (event.type) {
 	case SDL_QUIT:
-		game_is_running = FALSE;
+		controlls.game_is_running = FALSE;
 		break;
 
 	case SDL_KEYDOWN:
-		if (event.key.keysym.sym == SDLK_ESCAPE) {
-			game_is_running = FALSE;
+		if (event.key.keysym.sym == SDLK_ESCAPE)
+			controlls.game_is_running = FALSE;
+		if (event.key.keysym.sym == SDLK_UP) {
+			controlls.up == TRUE;
+			player.y_vel = -SPEED;
 		}
-		break;
+		if (event.key.keysym.sym == SDLK_DOWN) {
+			controlls.down == TRUE;
+			player.y_vel = SPEED;
+		}
+
+	case SDL_KEYUP:
+		if (event.key.keysym.sym == SDLK_UP) {
+			controlls.up == FALSE;
+		}
+		if (event.key.keysym.sym == SDLK_DOWN) {
+			controlls.down == FALSE;
+		}
 	}
 }
+
 void Start() {
 	box.x = (WINDOW_WIDHT - box.width) / 2;
 	box.y = (WINDOW_HEIGHT - box.height) / 2;
@@ -70,18 +98,22 @@ void Start() {
 	box.height = 10;
 	box.x_velocity = SPEED;
 	box.y_velocity = SPEED;
+
+	player.x = 15;
+	player.y = (WINDOW_HEIGHT - player.height) / 2;
+	player.width = 15;
+	player.height = 50;
+	player.y_vel = -SPEED;
 }
 
 void Update() {
 	//logic for fixed timeStep
-
 	///<summary>
 	/// wait until we reach the frame target time;
 	/// while (!SDL_TICKS_PASSED(SDL_GetTicks(), last_frame_time + FRAME_TARGET_TIME));
 	/// a while loop can be dangerous for the processor as it takes all the attention for the time being making it heavy on the cpu
 	/// therefore using a SDL_Delay() would be a much better option as its not heavy on the CPU
 	///</summary>
-	
 	int time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - last_frame_time);
 	if (time_to_wait > 0 && time_to_wait <= FRAME_TARGET_TIME) {
 		SDL_Delay(time_to_wait);
@@ -89,10 +121,22 @@ void Update() {
 
 	//get a delta time factor, convert it to seconds to be used to update my game objects;
 	float delta_time = (SDL_GetTicks() - last_frame_time) / 1000.0f;
-
 	//store the ms of the current frame to be used in the next one;
 	last_frame_time = SDL_GetTicks();
 
+	//control update for player
+	player.y += player.y_vel * delta_time;
+	//checking for player bounds 
+	if (player.y <= 0) {
+		player.y = 0;
+		player.y_vel = -player.y_vel;
+	}	
+	if (player.y >= WINDOW_HEIGHT - player.height) {
+		player.y = WINDOW_HEIGHT - player.height;
+		player.y_vel = -player.y_vel;
+	}
+
+	//ball controlls 
 	box.x += box.x_velocity * delta_time;
 	box.y += box.y_velocity * delta_time;
 
@@ -100,6 +144,7 @@ void Update() {
 	if (box.x <= 0) {
 		box.x = 0;
 		box.x_velocity = -box.x_velocity;
+		//controlls.game_is_running = FALSE;
 	}
 	if (box.y <= 0) {
 		box.y = 0;
@@ -108,12 +153,13 @@ void Update() {
 	if (box.x >= WINDOW_WIDHT - box.width) {
 		box.x = WINDOW_WIDHT - box.width;
 		box.x_velocity = -box.x_velocity;
+		//controlls.game_is_running = FALSE;
 	}
 	if (box.y >= WINDOW_HEIGHT - box.height) {
 		box.y = WINDOW_HEIGHT - box.height;
 		box.y_velocity = -box.y_velocity;
 	}
-	
+
 }
 
 void Render() {
@@ -128,8 +174,16 @@ void Render() {
 		(int)box.height
 	};
 
+	SDL_Rect player_rect = {
+		(int)player.x,
+		(int)player.y,
+		(int)player.width,
+		(int)player.height
+	};
+
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderFillRect(renderer, &box_rect);
+	SDL_RenderFillRect(renderer, &player_rect);
 
 	SDL_RenderPresent(renderer);
 	
@@ -146,11 +200,11 @@ void Destroy_Window() {
 /// argv (argument vector) - Pointer to the first element of an array of argc + 1 pointers, of which the last one is null and the previous ones, if any, point to strings that represent the arguments passed to the program from the host environment. If argv[0] is not a null pointer (or, equivalently, if argc > 0), it points to a string that represents the program name, which is empty if the program name is not available from the host environment.
 /// </summary>
 int main(int argc, char* argv[]) {
-	game_is_running = Initialize_Window();
+	controlls.game_is_running = Initialize_Window();
 
 	Start();
 
-	while (game_is_running) {
+	while (controlls.game_is_running) {
 		Process_Input();
 		Update();
 		Render();
