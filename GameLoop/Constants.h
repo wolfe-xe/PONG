@@ -7,6 +7,7 @@
 #define WINDOW_HEIGHT 600
 
 #define SPEED 200
+#define BALLSPEED 100
 
 #define FPS 30
 #define FRAME_TARGET_TIME (1000 / FPS)
