@@ -205,9 +205,9 @@ void Start() {
 	p_score_max.h = 100;
 	p_score_max.w = 10;
 
-	o_score.x = WINDOW_WIDTH - 230;
+	o_score.x = WINDOW_WIDTH - 130;
 	o_score.y = 15;
-	o_score.h = 100;
+	o_score.h = -100;
 	o_score.w = 10;
 
 	o_score_max.x = WINDOW_WIDTH - 230;
@@ -271,16 +271,17 @@ void Update() {
 		box.x = (WINDOW_WIDTH - box.width) / 2;
 		box.x_velocity = -box.x_velocity;
 		p_score.h -= 10;
-		if (p_score.h == 0) {
+		if (p_score.h <= 0) {
 			printf("gameOver\n");
+			controls.game_is_running = FALSE;
 		}
 		printf("left side\n");
 	}
 	if (box.x >= WINDOW_WIDTH - box.width) {
 		box.x = (WINDOW_WIDTH - box.width) / 2;
 		box.x_velocity = -box.x_velocity;
-		o_score.h -= 10;
-		if (o_score.h == 0) {
+		o_score.h += 10;
+		if (o_score.h >= 0) {
 			printf("gameOver\n");
 			controls.game_is_running = FALSE;
 		}
@@ -435,10 +436,11 @@ int main(int argc, char* argv[]) {
 /// []better game mechanics
 /// []better collision detection
 /// [x]random value at start
-///		[]work on randomness
-/// []Graphical elements
-///		[-]middle line separating both halfs
-///		[]score ui
+///	[]work on randomness
+/// [-]Graphical elements
+///		[x]middle line separating both halfs
+///		[x]score ui
+///		[]make a better score UI
 ///	[]possibly a start menu
 ///		[]restart
 ///		[]pause and play
