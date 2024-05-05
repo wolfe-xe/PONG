@@ -84,7 +84,7 @@ int Initialize_Window(void) {
 		return FALSE;
 	}
 	window = SDL_CreateWindow(
-		"GameLoop", 
+		"PONG (15 FPS)", 
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		WINDOW_WIDTH,
@@ -114,6 +114,11 @@ void Process_Input() {
 	case SDL_KEYDOWN:
 		if (event.key.keysym.sym == SDLK_ESCAPE) {
 			controls.game_is_running = FALSE;
+			printf("QUIT\n");
+		}
+		if (event.key.keysym.sym == SDLK_r) {
+			controls.game_is_restarted = TRUE;
+			printf("restart\n");
 		}
 		//player controls
 		if (event.key.keysym.sym == SDLK_w) {
@@ -297,6 +302,19 @@ void Update() {
 		box.y_velocity = -box.y_velocity;
 	}
 
+	//collision detection using AABB(Axis aligned Bounding Box)
+	if (player.x < box.x + box.width && player.x + player.width > box.x &&
+		player.y < box.y + box.height && player.y + player.height > box.y) {
+		printf("collided with player\n");
+		box.x_velocity = -box.x_velocity;
+		box.y_velocity = -box.y_velocity;
+	}
+	if (opponent.x < box.x + box.width && opponent.x + opponent.width > box.x &&
+		opponent.y < box.y + box.height && opponent.y + opponent.height > box.y) {
+		printf("collided with opponent\n");
+		box.x_velocity = -box.x_velocity;
+		box.y_velocity = -box.y_velocity;
+	}
 }
 
 void Render() {
@@ -360,20 +378,22 @@ void Render() {
 		(int)o_score_max.w,
 	};
 
-	//checks for player collision
-	SDL_bool playerCollision = SDL_HasIntersection(&player_rect, &box_rect);
+	//checks for player collision using the SDL_HasIntersection function to check for intersections between objects
+	/*SDL_bool playerCollision = SDL_HasIntersection(&player_rect, &box_rect);
 	if (playerCollision) {
 		printf("collided with player\n");
 		box.x_velocity = -box.x_velocity;
 		box.y_velocity = -box.y_velocity;
-	}
-	//checks for opponents collision
-	SDL_bool opponentCollision = SDL_HasIntersection(&opponent_rect, &box_rect);
+	}*/
+	//checks for opponents collision using the SDL_HasIntersection function to check for intersections between objects
+	/*SDL_bool opponentCollision = SDL_HasIntersection(&opponent_rect, &box_rect);
 	if (opponentCollision) {
 		printf("collided with opponent\n");
 		box.x_velocity = -box.x_velocity;
 		box.y_velocity = -box.y_velocity;
-	}
+	}*/
+
+	
 
 	SDL_SetRenderDrawColor(renderer, 115, 110, 110, 255);
 	SDL_RenderFillRect(renderer, &p_score_max_rect);
@@ -433,7 +453,6 @@ int main(int argc, char* argv[]) {
 }
 
 /// TODO:
-/// []better game mechanics
 /// []better collision detection
 /// [x]random value at start
 ///	[]work on randomness
@@ -441,7 +460,6 @@ int main(int argc, char* argv[]) {
 ///		[x]middle line separating both halfs
 ///		[x]score ui
 ///		[]make a better score UI
-///	[]possibly a start menu
-///		[]restart
-///		[]pause and play
+///	[]restart
+///	[]pause and play
 
