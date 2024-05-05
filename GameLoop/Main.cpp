@@ -17,6 +17,13 @@ struct controls {
 	int down = FALSE;
 } controls;
 
+struct dir {
+	int pd = FALSE;
+	int pu = FALSE;
+	int od = FALSE;
+	int ou = FALSE;
+};
+
 struct Box {
 	float x;
 	float y;
@@ -243,6 +250,14 @@ void Update() {
 
 	//control update for player
 	player.y += player.y_vel * delta_time;
+	//checking player dir
+	/*if (player.y_vel == SPEED) {
+		printf("down\n");
+	}
+	else {
+		printf("up\n");
+	}*/
+
 	//checking for player bounds 
 	if (player.y <= 0) {
 		player.y = 0;
@@ -280,7 +295,7 @@ void Update() {
 			printf("gameOver\n");
 			controls.game_is_running = FALSE;
 		}
-		printf("left side\n");
+		//printf("left side\n");
 	}
 	if (box.x >= WINDOW_WIDTH - box.width) {
 		box.x = (WINDOW_WIDTH - box.width) / 2;
@@ -290,7 +305,7 @@ void Update() {
 			printf("gameOver\n");
 			controls.game_is_running = FALSE;
 		}
-		printf("right side\n");
+		//printf("right side\n");
 	}
 	if (box.y <= 0) {
 		box.y = 0;
@@ -305,15 +320,31 @@ void Update() {
 	//collision detection using AABB(Axis aligned Bounding Box)
 	if (player.x < box.x + box.width && player.x + player.width > box.x &&
 		player.y < box.y + box.height && player.y + player.height > box.y) {
-		printf("collided with player\n");
-		box.x_velocity = -box.x_velocity;
-		box.y_velocity = -box.y_velocity;
+		if (player.y_vel == SPEED) {
+			//printf("down\n");
+			box.y_velocity = -box.y_velocity;
+			box.x_velocity = -box.x_velocity;
+		}
+		else {
+			box.x_velocity = -box.x_velocity;
+			box.y_velocity = box.y_velocity;
+		}
+		//box.x_velocity = -box.x_velocity;
+		//box.y_velocity = -box.y_velocity;
 	}
 	if (opponent.x < box.x + box.width && opponent.x + opponent.width > box.x &&
 		opponent.y < box.y + box.height && opponent.y + opponent.height > box.y) {
-		printf("collided with opponent\n");
-		box.x_velocity = -box.x_velocity;
-		box.y_velocity = -box.y_velocity;
+		if (opponent.y_vel == SPEED) {
+			//printf("down\n");
+			box.x_velocity = -box.x_velocity;
+			box.y_velocity = box.y_velocity;
+		}
+		else {
+			box.x_velocity = -box.x_velocity;
+			box.y_velocity = -box.y_velocity;
+		}
+		//box.x_velocity = -box.x_velocity;
+		//box.y_velocity = -box.y_velocity;
 	}
 }
 
@@ -453,7 +484,7 @@ int main(int argc, char* argv[]) {
 }
 
 /// TODO:
-/// []better collision detection
+/// [-]better collision detection
 /// [x]random value at start
 ///	[]work on randomness
 /// [-]Graphical elements

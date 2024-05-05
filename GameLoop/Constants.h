@@ -9,5 +9,5 @@
 #define SPEED 200
 #define BALLSPEED 100
 
-#define FPS 15
+#define FPS 150
 #define FRAME_TARGET_TIME (1000 / FPS)
